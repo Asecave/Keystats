@@ -1,17 +1,20 @@
 package main;
 
 import java.awt.AWTException;
-import java.awt.CheckboxMenuItem;
 import java.awt.MenuItem;
 import java.awt.PopupMenu;
 import java.awt.SystemTray;
+import java.awt.Toolkit;
 import java.awt.TrayIcon;
-import java.io.IOException;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
-import javax.imageio.ImageIO;
 import javax.swing.JOptionPane;
 
 public class Tray {
+	
+	private SystemTray tray = SystemTray.getSystemTray();
+	TrayIcon trayIcon = null;
 
 	public Tray(Logger logger) {
 		
@@ -22,24 +25,32 @@ public class Tray {
 		
 		final PopupMenu popup = new PopupMenu();
 		
-		TrayIcon trayIcon = null;
-		try {
-			trayIcon = new TrayIcon(ImageIO.read(Tray.class.getResourceAsStream("icon.png")));
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		
-		final SystemTray tray = SystemTray.getSystemTray();
+		trayIcon = new TrayIcon(Toolkit.getDefaultToolkit().getImage(Tray.class.getResource("icon_tray.png")));
+		trayIcon.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				logger.trayClicked();
+			}
+		});
 
-		CheckboxMenuItem enable = new CheckboxMenuItem("Set auto size");
-		MenuItem infoItem = new MenuItem("Info");
-		MenuItem exit = new MenuItem("Exit") {
+		MenuItem show = new MenuItem("Show");
+		show.addActionListener(new ActionListener() {
 			
-		};
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				logger.trayClicked();
+			}
+		});
+		MenuItem exit = new MenuItem("Exit");
+		exit.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				logger.exit();
+				tray.remove(trayIcon);
+			}
+		});
 
-		// Add components to pop-up menu
-		popup.add(enable);
-		popup.add(infoItem);
+		popup.add(show);
 		popup.addSeparator();
 		popup.add(exit);
 
