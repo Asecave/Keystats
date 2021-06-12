@@ -11,8 +11,24 @@ public class Hook {
 
 	private GlobalKeyboardHook keyboardHook;
 	private GlobalMouseHook mouseHook;
+	private Logger logger;
 
 	public Hook(Logger logger) {
+		this.logger = logger;
+		begin();
+	}
+
+	public void stop() {
+		keyboardHook.shutdownHook();
+		mouseHook.shutdownHook();
+	}
+
+	public void pause() {
+		keyboardHook.shutdownHook();
+		mouseHook.shutdownHook();
+	}
+	
+	public void begin() {
 		keyboardHook = new GlobalKeyboardHook(true);
 
 		keyboardHook.addKeyListener(new GlobalKeyAdapter() {
@@ -36,10 +52,5 @@ public class Hook {
 				}
 			}
 		});
-	}
-
-	public void stop() {
-		keyboardHook.shutdownHook();
-		mouseHook.shutdownHook();
 	}
 }

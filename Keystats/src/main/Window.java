@@ -6,6 +6,9 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.GridLayout;
 import java.awt.Toolkit;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
 import java.util.ArrayList;
 
 import javax.swing.GroupLayout;
@@ -13,6 +16,7 @@ import javax.swing.GroupLayout.Alignment;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSeparator;
@@ -26,7 +30,7 @@ public class Window {
 	private JFrame frmKeystats;
 	private JLabel totalTime, totalTimeToday;
 	private JLabel totalKeys, totalButtons, button1, button2, button3, totalKeysToday, totalButtonsToday, button1Today, button2Today, button3Today;
-	private JButton load, save, close;
+	private JButton load, save, reset;
 	private JScrollPane keys, todayKeys;
 	private ArrayList<ListElement> keyList, todayList;
 	private JPanel keysGroundPanel, todayKeysGroundPanel;
@@ -37,8 +41,8 @@ public class Window {
 	/**
 	 * Create the application.
 	 */
-	public Window() {
-		initialize();
+	public Window(Logger logger) {
+		initialize(logger);
 		show();
 		todayStartTime = System.currentTimeMillis();
 		keyList = new ArrayList<>();
@@ -48,7 +52,7 @@ public class Window {
 	/**
 	 * Initialize the contents of the frame.
 	 */
-	private void initialize() {
+	private void initialize(Logger logger) {
 		frmKeystats = new JFrame();
 		frmKeystats.setResizable(false);
 		frmKeystats.setIconImage(Toolkit.getDefaultToolkit().getImage(Window.class.getResource("icon32.png")));
@@ -216,15 +220,47 @@ public class Window {
 
 		load = new JButton("Load");
 		load.setFont(new Font("Tahoma", Font.PLAIN, 15));
+		load.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				logger.pauseHook();
+				logger.load();
+				logger.continueHook();
+			}
+		});
 		panel_2.add(load);
 
 		save = new JButton("Save");
 		save.setFont(new Font("Tahoma", Font.PLAIN, 15));
+		save.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				logger.pauseHook();
+				logger.store();
+				logger.continueHook();
+			}
+		});
 		panel_2.add(save);
 
-		close = new JButton("Close");
-		close.setFont(new Font("Tahoma", Font.PLAIN, 15));
-		panel_2.add(close);
+		reset = new JButton("Reset");
+		reset.setFont(new Font("Tahoma", Font.PLAIN, 15));
+		reset.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				logger.pauseHook();
+				String input = JOptionPane.showInputDialog(new JFrame(), "Are you sure you want to reset your statistics?\n"
+						+ "Unless you exported a backup berfore it will be lost forever.\n"
+						+ "Please type \"reset\" to cornfirm.", "Reset", JOptionPane.WARNING_MESSAGE);
+				if (input != null && input.toLowerCase().equals("reset")) {
+					logger.reset();
+				}
+				logger.continueHook();
+			}
+		});
+		panel_2.add(reset);
 
 		JTabbedPane tabbedPane = new JTabbedPane(JTabbedPane.TOP);
 		tabbedPane.setBorder(null);
@@ -242,6 +278,7 @@ public class Window {
 		tabbedPane.addTab("Total keys", null, keys, null);
 
 		todayKeysGroundPanel = new JPanel();
+		todayKeysGroundPanel.setLayout(new GridBagLayout());
 
 		todayKeys = new JScrollPane(todayKeysGroundPanel);
 		todayKeys.setBorder(null);
@@ -261,7 +298,7 @@ public class Window {
 
 	public void update() {
 		if (frmKeystats.isVisible()) {
-			long millis = System.currentTimeMillis() - totalTimee;
+			long millis = System.currentTimeMillis() - todayStartTime + totalTimee;
 			int seconds = (int) (millis / 1000) % 60;
 			int minutes = (int) ((millis / (1000 * 60)) % 60);
 			int hours = (int) ((millis / (1000 * 60 * 60)));
@@ -297,13 +334,48 @@ public class Window {
 					}
 				}
 				if (!exists) {
-					ListElement e = new ListElement("" + ((char) i), keys[i], i);
+					char c = (char) i;
+					String text = null;
+					if (isPrintableChar(c)) {
+						text = "" + c;
+					} else {
+						text = "" + i;
+					}
+					ListElement e = new ListElement(text, keys[i], i);
 					GridBagConstraints gbc = new GridBagConstraints();
 					gbc.gridwidth = GridBagConstraints.REMAINDER;
 					gbc.weightx = 1;
 					gbc.fill = GridBagConstraints.HORIZONTAL;
 					keysGroundPanel.add(e, gbc, 0);
 					keyList.add(e);
+				}
+			}
+		}
+		for (int i = 0; i < keysToday.length; i++) {
+			if (keysToday[i] != 0) {
+				boolean exists = false;
+				for (ListElement l : todayList) {
+					if (l.matches(i)) {
+						l.setNumber(keysToday[i]);
+						exists = true;
+						break;
+					}
+				}
+				if (!exists) {
+					char c = (char) i;
+					String text = null;
+					if (isPrintableChar(c)) {
+						text = "" + c;
+					} else {
+						text = "" + i;
+					}
+					ListElement e = new ListElement(text, keysToday[i], i);
+					GridBagConstraints gbc = new GridBagConstraints();
+					gbc.gridwidth = GridBagConstraints.REMAINDER;
+					gbc.weightx = 1;
+					gbc.fill = GridBagConstraints.HORIZONTAL;
+					todayKeysGroundPanel.add(e, gbc, 0);
+					todayList.add(e);
 				}
 			}
 		}
@@ -315,5 +387,25 @@ public class Window {
 
 	public void setTotalTime(long totalTime) {
 		totalTimee = totalTime;
+	}
+
+	public boolean isPrintableChar(char c) {
+		Character.UnicodeBlock block = Character.UnicodeBlock.of(c);
+		return (!Character.isISOControl(c)) && c != KeyEvent.CHAR_UNDEFINED && block != null && block != Character.UnicodeBlock.SPECIALS;
+	}
+
+	public void resetKeys() {
+		keyList = new ArrayList<>();
+		todayList = new ArrayList<>();
+		keysGroundPanel.removeAll();
+		keysGroundPanel.repaint();
+		todayKeysGroundPanel.removeAll();
+		todayKeysGroundPanel.repaint();
+		totalTimee = 0;
+		todayStartTime = System.currentTimeMillis();
+	}
+
+	public long getTotalTime() {
+		return System.currentTimeMillis() - todayStartTime + totalTimee;
 	}
 }

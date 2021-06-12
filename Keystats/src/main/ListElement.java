@@ -22,7 +22,7 @@ public class ListElement extends JPanel {
 		
 		this.keyCode = keyCode;
 		
-		textLabel = new JLabel(KeyStroke.getKeyStroke((char) keyCode).getKeyChar() + "");
+		textLabel = new JLabel(text);
 		textLabel.setFont(new Font("Tahoma", Font.PLAIN, 15));
 		numberLabel = new JLabel();
 		numberLabel.setHorizontalAlignment(SwingConstants.RIGHT);

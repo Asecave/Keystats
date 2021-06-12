@@ -1,27 +1,5 @@
-totalKeys 370
-totalButtons 106
-totalTime 1623508533804
-key 13 1
-key 16 4
-key 27 4
-key 32 2
-key 45 20
-key 46 56
-key 49 1
-key 50 7
-key 51 1
-key 65 17
-key 66 13
-key 68 6
-key 69 14
-key 81 2
-key 83 5
-key 87 35
-key 88 11
-key 186 20
-key 191 15
-key 192 41
-key 222 19
-key 255 76
-button 1 87
-button 2 19
+totalKeys 0
+totalButtons 3
+totalTime 2869
+button 1 2
+button 2 1
