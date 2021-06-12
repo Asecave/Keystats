@@ -2,8 +2,11 @@ package main;
 
 import java.awt.Color;
 import java.awt.Font;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
 import java.awt.GridLayout;
 import java.awt.Toolkit;
+import java.util.ArrayList;
 
 import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.Alignment;
@@ -24,7 +27,12 @@ public class Window {
 	private JLabel totalTime, totalTimeToday;
 	private JLabel totalKeys, totalButtons, button1, button2, button3, totalKeysToday, totalButtonsToday, button1Today, button2Today, button3Today;
 	private JButton load, save, close;
-	private JScrollPane keys, buttons;
+	private JScrollPane keys, todayKeys;
+	private ArrayList<ListElement> keyList, todayList;
+	private JPanel keysGroundPanel, todayKeysGroundPanel;
+
+	private long totalTimee;
+	private long todayStartTime;
 
 	/**
 	 * Create the application.
@@ -32,6 +40,9 @@ public class Window {
 	public Window() {
 		initialize();
 		show();
+		todayStartTime = System.currentTimeMillis();
+		keyList = new ArrayList<>();
+		todayList = new ArrayList<>();
 	}
 
 	/**
@@ -204,12 +215,15 @@ public class Window {
 		panel_2.setLayout(new GridLayout(1, 0, 0, 0));
 
 		load = new JButton("Load");
+		load.setFont(new Font("Tahoma", Font.PLAIN, 15));
 		panel_2.add(load);
 
 		save = new JButton("Save");
+		save.setFont(new Font("Tahoma", Font.PLAIN, 15));
 		panel_2.add(save);
 
 		close = new JButton("Close");
+		close.setFont(new Font("Tahoma", Font.PLAIN, 15));
 		panel_2.add(close);
 
 		JTabbedPane tabbedPane = new JTabbedPane(JTabbedPane.TOP);
@@ -218,11 +232,23 @@ public class Window {
 		tabbedPane.setBounds(385, 113, 289, 265);
 		frmKeystats.getContentPane().add(tabbedPane);
 
-		keys = new JScrollPane();
-		tabbedPane.addTab("Keys", null, keys, null);
+		keysGroundPanel = new JPanel();
+		keysGroundPanel.setLayout(new GridBagLayout());
 
-		buttons = new JScrollPane();
-		tabbedPane.addTab("Buttons", null, buttons, null);
+		keys = new JScrollPane(keysGroundPanel);
+		keys.setBorder(null);
+		keys.getVerticalScrollBar().setUnitIncrement(5);
+
+		tabbedPane.addTab("Total keys", null, keys, null);
+
+		todayKeysGroundPanel = new JPanel();
+
+		todayKeys = new JScrollPane(todayKeysGroundPanel);
+		todayKeys.setBorder(null);
+		todayKeys.getVerticalScrollBar().setUnitIncrement(5);
+
+		tabbedPane.addTab("Today keys", null, todayKeys, null);
+
 	}
 
 	public void show() {
@@ -235,11 +261,15 @@ public class Window {
 
 	public void update() {
 		if (frmKeystats.isVisible()) {
-			long millis = System.currentTimeMillis();
+			long millis = System.currentTimeMillis() - totalTimee;
 			int seconds = (int) (millis / 1000) % 60;
 			int minutes = (int) ((millis / (1000 * 60)) % 60);
 			int hours = (int) ((millis / (1000 * 60 * 60)));
 			totalTime.setText(String.format("%02d:%02d:%02d", hours, minutes, seconds));
+			millis = System.currentTimeMillis() - todayStartTime;
+			seconds = (int) (millis / 1000) % 60;
+			minutes = (int) ((millis / (1000 * 60)) % 60);
+			hours = (int) ((millis / (1000 * 60 * 60)));
 			totalTimeToday.setText(String.format("%02d:%02d:%02d", hours, minutes, seconds));
 		}
 	}
@@ -256,10 +286,34 @@ public class Window {
 		this.button1Today.setText("" + buttonsToday[1]);
 		this.button2Today.setText("" + buttonsToday[2]);
 		this.button3Today.setText("" + buttonsToday[3]);
-		
+		for (int i = 0; i < keys.length; i++) {
+			if (keys[i] != 0) {
+				boolean exists = false;
+				for (ListElement l : keyList) {
+					if (l.matches(i)) {
+						l.setNumber(keys[i]);
+						exists = true;
+						break;
+					}
+				}
+				if (!exists) {
+					ListElement e = new ListElement("" + ((char) i), keys[i], i);
+					GridBagConstraints gbc = new GridBagConstraints();
+					gbc.gridwidth = GridBagConstraints.REMAINDER;
+					gbc.weightx = 1;
+					gbc.fill = GridBagConstraints.HORIZONTAL;
+					keysGroundPanel.add(e, gbc, 0);
+					keyList.add(e);
+				}
+			}
+		}
 	}
-	
+
 	public boolean isVisible() {
 		return frmKeystats.isVisible();
+	}
+
+	public void setTotalTime(long totalTime) {
+		totalTimee = totalTime;
 	}
 }

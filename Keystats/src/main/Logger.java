@@ -4,6 +4,8 @@ public class Logger {
 
 	private Hook hook;
 	private Window window;
+	private FileManager fileManager; 
+	
 	private boolean running;
 
 	private int totalKeys;
@@ -14,6 +16,7 @@ public class Logger {
 	private int totalButtonsToday;
 	private int[] buttons;
 	private int[] buttonsToday;
+	private long totalTime;
 
 	public Logger() {
 		keys = new int[256];
@@ -23,6 +26,8 @@ public class Logger {
 		hook = new Hook(this);
 		new Tray(this);
 		window = new Window();
+		fileManager = new FileManager(this);
+		window.updateNumbers(totalKeys, totalKeysToday, keys, keysToday, totalButtons, totalButtonsToday, buttons, buttonsToday);
 
 		running = true;
 		while (running) {
@@ -58,10 +63,41 @@ public class Logger {
 	public void exit() {
 		window.dispose();
 		hook.stop();
+		running = false;
+		fileManager.save(totalKeys, totalKeysToday, keys, keysToday, totalButtons, totalButtonsToday, buttons, buttonsToday, totalTime);
 	}
 
 	public void trayClicked() {
 		window.show();
 		window.updateNumbers(totalKeys, totalKeysToday, keys, keysToday, totalButtons, totalButtonsToday, buttons, buttonsToday);
+	}
+
+	public void setTotalKeys(int totalKeys) {
+		this.totalKeys = totalKeys;
+	}
+
+	public void setKeys(int[] keys) {
+		this.keys = keys;
+	}
+
+	public void setTotalButtons(int totalButtons) {
+		this.totalButtons = totalButtons;
+	}
+
+	public void setButtons(int[] buttons) {
+		this.buttons = buttons;
+	}
+
+	public void setTotalTime(long totalTime) {
+		this.totalTime = totalTime;
+		window.setTotalTime(totalTime);
+	}
+	
+	public void setKey(int keyCode, int clicks) {
+		keys[keyCode] = clicks;
+	}
+	
+	public void setButton(int keyCode, int clicks) {
+		buttons[keyCode] = clicks;
 	}
 }

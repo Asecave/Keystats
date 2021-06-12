@@ -40,5 +40,6 @@ public class Hook {
 
 	public void stop() {
 		keyboardHook.shutdownHook();
+		mouseHook.shutdownHook();
 	}
 }
