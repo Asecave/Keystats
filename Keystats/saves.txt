@@ -1,5 +1,0 @@
-totalKeys 0
-totalButtons 3
-totalTime 2869
-button 1 2
-button 2 1

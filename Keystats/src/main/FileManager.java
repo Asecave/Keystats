@@ -21,6 +21,7 @@ public class FileManager {
 		if (!saves.exists()) {
 			try {
 				saves.createNewFile();
+				logger.firstStart();
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
@@ -91,7 +92,6 @@ public class FileManager {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		logger.setTotalTime(System.currentTimeMillis());
 		
 		for (int i = 0; i < lines.length; i++) {
 			if (lines[i].startsWith("totalKeys")) {

@@ -30,7 +30,7 @@ public class Window {
 	private JFrame frmKeystats;
 	private JLabel totalTime, totalTimeToday;
 	private JLabel totalKeys, totalButtons, button1, button2, button3, totalKeysToday, totalButtonsToday, button1Today, button2Today, button3Today;
-	private JButton load, save, reset;
+	private JButton load, save, reset, stop;
 	private JScrollPane keys, todayKeys;
 	private ArrayList<ListElement> keyList, todayList;
 	private JPanel keysGroundPanel, todayKeysGroundPanel;
@@ -43,7 +43,6 @@ public class Window {
 	 */
 	public Window(Logger logger) {
 		initialize(logger);
-		show();
 		todayStartTime = System.currentTimeMillis();
 		keyList = new ArrayList<>();
 		todayList = new ArrayList<>();
@@ -221,7 +220,7 @@ public class Window {
 		load = new JButton("Load");
 		load.setFont(new Font("Tahoma", Font.PLAIN, 15));
 		load.addActionListener(new ActionListener() {
-			
+
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				logger.pauseHook();
@@ -234,7 +233,7 @@ public class Window {
 		save = new JButton("Save");
 		save.setFont(new Font("Tahoma", Font.PLAIN, 15));
 		save.addActionListener(new ActionListener() {
-			
+
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				logger.pauseHook();
@@ -247,13 +246,15 @@ public class Window {
 		reset = new JButton("Reset");
 		reset.setFont(new Font("Tahoma", Font.PLAIN, 15));
 		reset.addActionListener(new ActionListener() {
-			
+
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				logger.pauseHook();
-				String input = JOptionPane.showInputDialog(new JFrame(), "Are you sure you want to reset your statistics?\n"
-						+ "Unless you exported a backup berfore it will be lost forever.\n"
-						+ "Please type \"reset\" to cornfirm.", "Reset", JOptionPane.WARNING_MESSAGE);
+				String input = JOptionPane
+						.showInputDialog(
+								new JFrame(), "Are you sure you want to reset your statistics?\n"
+										+ "Unless you exported a backup berfore it will be lost forever.\n" + "Please type \"reset\" to cornfirm.",
+								"Reset", JOptionPane.WARNING_MESSAGE);
 				if (input != null && input.toLowerCase().equals("reset")) {
 					logger.reset();
 				}
@@ -261,6 +262,17 @@ public class Window {
 			}
 		});
 		panel_2.add(reset);
+
+		stop = new JButton("Stop");
+		stop.setFont(new Font("Tahoma", Font.PLAIN, 15));
+		stop.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				logger.exit();
+			}
+		});
+		panel_2.add(stop);
 
 		JTabbedPane tabbedPane = new JTabbedPane(JTabbedPane.TOP);
 		tabbedPane.setBorder(null);
